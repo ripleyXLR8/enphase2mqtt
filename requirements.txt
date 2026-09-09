@@ -1,0 +1,4 @@
+# Epinglee : une evolution de rupture de la bibliotheque casserait la
+# passerelle en silence. La montee de version est un acte delibere.
+pyenphase==4.0.1
+paho-mqtt>=2.1,<3

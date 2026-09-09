@@ -1,0 +1,328 @@
+{
+  "_comment": "Forme reelle d'un EnvoyData triphase a 10 micro-onduleurs. Valeurs relevees sur une installation, numeros de serie synthetiques.",
+  "envoy": {
+    "serial_number": "122239086186",
+    "firmware": "8.3.5169",
+    "part_number": "800-00654-r08",
+    "phase_count": 3
+  },
+  "data": {
+    "system_production": {
+      "watts_now": 1963,
+      "watt_hours_today": 923,
+      "watt_hours_last_7_days": 97095,
+      "watt_hours_lifetime": 9732291
+    },
+    "system_consumption": {
+      "watts_now": 2849,
+      "watt_hours_today": 17117,
+      "watt_hours_last_7_days": 365552,
+      "watt_hours_lifetime": 58486642
+    },
+    "system_net_consumption": {
+      "watts_now": 886,
+      "watt_hours_today": 0,
+      "watt_hours_last_7_days": 0,
+      "watt_hours_lifetime": 48755591
+    },
+    "system_production_phases": {
+      "L1": {
+        "watts_now": 805,
+        "watt_hours_today": 345,
+        "watt_hours_last_7_days": 29254,
+        "watt_hours_lifetime": 2887283
+      },
+      "L2": {
+        "watts_now": 583,
+        "watt_hours_today": 360,
+        "watt_hours_last_7_days": 38502,
+        "watt_hours_lifetime": 3943678
+      },
+      "L3": {
+        "watts_now": 574,
+        "watt_hours_today": 218,
+        "watt_hours_last_7_days": 29339,
+        "watt_hours_lifetime": 2901330
+      }
+    },
+    "system_consumption_phases": {
+      "L1": {
+        "watts_now": 44,
+        "watt_hours_today": 305,
+        "watt_hours_last_7_days": 7,
+        "watt_hours_lifetime": 3289573
+      },
+      "L2": {
+        "watts_now": 2117,
+        "watt_hours_today": 6075,
+        "watt_hours_last_7_days": 173998,
+        "watt_hours_lifetime": 31560672
+      },
+      "L3": {
+        "watts_now": 688,
+        "watt_hours_today": 2910,
+        "watt_hours_last_7_days": 57619,
+        "watt_hours_lifetime": 23636397
+      }
+    },
+    "system_net_consumption_phases": {
+      "L1": {
+        "watts_now": -761,
+        "watt_hours_today": 0,
+        "watt_hours_last_7_days": 0,
+        "watt_hours_lifetime": 402786
+      },
+      "L2": {
+        "watts_now": 1534,
+        "watt_hours_today": 0,
+        "watt_hours_last_7_days": 0,
+        "watt_hours_lifetime": 27617700
+      },
+      "L3": {
+        "watts_now": 113,
+        "watt_hours_today": 0,
+        "watt_hours_last_7_days": 0,
+        "watt_hours_lifetime": 20735105
+      }
+    },
+    "ctmeter_production": {
+      "active_power": 1963,
+      "current": 8.948,
+      "voltage": 704.303,
+      "power_factor": 0.927,
+      "frequency": 50.0,
+      "energy_delivered": 9732291,
+      "energy_received": 39105,
+      "eid": 704643328,
+      "measurement_type": "production",
+      "metering_status": "normal",
+      "state": "enabled",
+      "status_flags": [],
+      "timestamp": 1788941251
+    },
+    "ctmeter_consumption": {
+      "active_power": 872,
+      "current": 11.467,
+      "voltage": 704.505,
+      "power_factor": 0.321,
+      "frequency": 50.0,
+      "energy_delivered": 53376970,
+      "energy_received": 4621999,
+      "eid": 704643584,
+      "measurement_type": "net-consumption",
+      "metering_status": "normal",
+      "state": "enabled",
+      "status_flags": [],
+      "timestamp": 1788941251
+    },
+    "ctmeter_production_phases": {
+      "L1": {
+        "active_power": 805,
+        "current": 3.588,
+        "voltage": 240.799,
+        "power_factor": 0.932,
+        "frequency": 50.0,
+        "energy_delivered": 2887283,
+        "energy_received": 16412,
+        "eid": 1778385169,
+        "measurement_type": "production",
+        "metering_status": "normal",
+        "state": "enabled",
+        "status_flags": [],
+        "timestamp": 1788941251
+      },
+      "L2": {
+        "active_power": 583,
+        "current": 2.729,
+        "voltage": 228.132,
+        "power_factor": 0.93,
+        "frequency": 50.0,
+        "energy_delivered": 3943679,
+        "energy_received": 9357,
+        "eid": 1778385170,
+        "measurement_type": "production",
+        "metering_status": "normal",
+        "state": "enabled",
+        "status_flags": [],
+        "timestamp": 1788941251
+      },
+      "L3": {
+        "active_power": 575,
+        "current": 2.631,
+        "voltage": 235.372,
+        "power_factor": 0.918,
+        "frequency": 50.0,
+        "energy_delivered": 2901330,
+        "energy_received": 13335,
+        "eid": 1778385171,
+        "measurement_type": "production",
+        "metering_status": "normal",
+        "state": "enabled",
+        "status_flags": [],
+        "timestamp": 1788941251
+      }
+    },
+    "inverters": {
+      "482200000001": {
+        "serial_number": "482200000001",
+        "last_report_watts": 18,
+        "max_report_watts": 279,
+        "energy_today": 42,
+        "lifetime_energy": 906130,
+        "energy_produced": 15.4,
+        "dc_voltage": 38.042,
+        "dc_current": 0.694,
+        "temperature": 22,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000002": {
+        "serial_number": "482200000002",
+        "last_report_watts": 18,
+        "max_report_watts": 279,
+        "energy_today": 43,
+        "lifetime_energy": 920074,
+        "energy_produced": 15.4,
+        "dc_voltage": 34.556,
+        "dc_current": 0.57,
+        "temperature": 21,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000003": {
+        "serial_number": "482200000003",
+        "last_report_watts": 159,
+        "max_report_watts": 279,
+        "energy_today": 95,
+        "lifetime_energy": 966473,
+        "energy_produced": 15.4,
+        "dc_voltage": 32.802,
+        "dc_current": 8.491,
+        "temperature": 26,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000004": {
+        "serial_number": "482200000004",
+        "last_report_watts": 35,
+        "max_report_watts": 279,
+        "energy_today": 52,
+        "lifetime_energy": 1009881,
+        "energy_produced": 15.4,
+        "dc_voltage": 36.818,
+        "dc_current": 4.041,
+        "temperature": 22,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000005": {
+        "serial_number": "482200000005",
+        "last_report_watts": 161,
+        "max_report_watts": 279,
+        "energy_today": 92,
+        "lifetime_energy": 897477,
+        "energy_produced": 15.4,
+        "dc_voltage": 36.322,
+        "dc_current": 4.715,
+        "temperature": 25,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000006": {
+        "serial_number": "482200000006",
+        "last_report_watts": 22,
+        "max_report_watts": 279,
+        "energy_today": 49,
+        "lifetime_energy": 915259,
+        "energy_produced": 15.4,
+        "dc_voltage": 37.57,
+        "dc_current": 0.779,
+        "temperature": 22,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000007": {
+        "serial_number": "482200000007",
+        "last_report_watts": 46,
+        "max_report_watts": 279,
+        "energy_today": 65,
+        "lifetime_energy": 971975,
+        "energy_produced": 15.4,
+        "dc_voltage": 36.78,
+        "dc_current": 2.465,
+        "temperature": 23,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000008": {
+        "serial_number": "482200000008",
+        "last_report_watts": 211,
+        "max_report_watts": 279,
+        "energy_today": 103,
+        "lifetime_energy": 1028728,
+        "energy_produced": 15.4,
+        "dc_voltage": 32.744,
+        "dc_current": 8.384,
+        "temperature": 27,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000009": {
+        "serial_number": "482200000009",
+        "last_report_watts": 203,
+        "max_report_watts": 279,
+        "energy_today": 101,
+        "lifetime_energy": 1073130,
+        "energy_produced": 15.4,
+        "dc_voltage": 33.18,
+        "dc_current": 8.107,
+        "temperature": 26,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      },
+      "482200000010": {
+        "serial_number": "482200000010",
+        "last_report_watts": 186,
+        "max_report_watts": 279,
+        "energy_today": 90,
+        "lifetime_energy": 1007044,
+        "energy_produced": 15.4,
+        "dc_voltage": 33.387,
+        "dc_current": 8.272,
+        "temperature": 25,
+        "ac_voltage": 229.4,
+        "ac_current": 0.0,
+        "ac_frequency": 49.965,
+        "last_report_date": 1788941087,
+        "last_report_duration": 911
+      }
+    }
+  }
+}

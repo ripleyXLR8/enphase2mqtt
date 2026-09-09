@@ -1,0 +1,89 @@
+; enphase2mqtt - configuration file
+;
+; Copy this file to /config/enphase2mqtt.conf and fill it in.
+; Every setting below can also be supplied through an environment variable,
+; which takes precedence over the file. The variable name is given in the
+; comment above each option, and that is what the Unraid template uses.
+
+[envoy]
+; ENVOY_HOST
+; IP address or hostname of the Enphase IQ Gateway (Envoy) on your LAN.
+; Everything is read locally: the Enphase cloud is only contacted once, to
+; obtain the access token.
+host =
+
+; ENVOY_USER / ENVOY_PASSWORD
+; Your Enlighten account (the one used by the Enphase app). Needed to obtain
+; and to renew the local access token on firmware 7 and above.
+; On firmware below 7 there is no token: use the local Envoy account instead
+; (username "envoy", blank password derives it from the serial number).
+username =
+password =
+
+; ENVOY_TOKEN
+; Optional bootstrap token. Leave empty: the bridge obtains one from your
+; Enlighten credentials on first start and stores it in token_file.
+token =
+
+; ENVOY_TOKEN_FILE
+; Where the access token is stored, mode 0600. It must survive a container
+; restart, so keep it on the mounted /config folder. An owner token is valid
+; for one year and is renewed automatically a month before it expires.
+token_file = /config/enphase_token.json
+
+; ENVOY_POLL_INTERVAL
+; Seconds between two reads of the gateway. Minimum 15.
+; 60 is a sensible default: the CT meters are near real time, but the
+; microinverters only report every 5 minutes or so, and polling faster only
+; adds load to the gateway without adding information.
+poll_interval = 60
+
+; ENVOY_PUBLISH_PANELS
+; Publish one device per microinverter, with power, daily and lifetime energy,
+; DC voltage, DC current and temperature. This is the main reason this bridge
+; exists; turn it off only if you want the meters alone.
+publish_panels = true
+
+; ENVOY_PUBLISH_PHASES
+; Publish one device per phase. Only useful on a three phase installation.
+publish_phases = true
+
+; ENVOY_PANEL_NAMES
+; Optional mapping from microinverter serial number to a name of your choice,
+; comma separated. Without it panels are named "Panneau 1", "Panneau 2"... in
+; ascending serial number order, which will NOT necessarily match the numbering
+; of an existing integration - set this if you want to keep your own numbers.
+;   panel_names = 482233004696:Panneau 1, 482233004841:Panneau 2
+panel_names =
+
+[mqtt]
+; MQTT_HOST / MQTT_PORT
+host = 127.0.0.1
+port = 1883
+
+; MQTT_USER / MQTT_PASSWORD - leave empty for an anonymous broker.
+login =
+password =
+
+; MQTT_CLIENT_ID
+client_id = enphase2mqtt
+
+; MQTT_DISCOVERY_PREFIX
+; Where discovery messages are published. Must match what your consumer
+; listens on: "homeassistant" for Home Assistant, and the "configuration
+; topic" of the Jeedom MQTT Discovery plugin.
+discovery_prefix = homeassistant
+
+; MQTT_TOPIC_PREFIX
+; Root of the state topics.
+; Jeedom users: this prefix must also be listed in the "data topics" setting
+; of the MQTT Discovery plugin, otherwise the plugin ignores the discovery
+; messages. The plugin offers the discovered roots itself, with a "+" button.
+topic_prefix = enphase
+; Note: <prefix>/<serial>/link/state doubles as the availability topic of
+; every entity. MQTT allows one Last Will per connection, so keeping the two
+; on separate topics would leave one of them lying after a hard kill.
+
+[log]
+; LOG_LEVEL - DEBUG, INFO, WARNING or ERROR.
+level = INFO
