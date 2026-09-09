@@ -167,24 +167,24 @@ check(p["dc_v"].render(p["dc_v"].getter(panel.source(data))) == "38.0",
 
 print("\n== découverte ==")
 check(bridge._discovery_topic(gw, "prod_w", "sensor")
-      == "homeassistant/sensor/enphase_122239086186/prod_w/config",
+      == "homeassistant/sensor/enphase_122200000001/prod_w/config",
       "le topic de découverte est bien formé")
-check(gw.state_topic(by_key["prod_w"]) == "enphase/122239086186/prod_w/state",
+check(gw.state_topic(by_key["prod_w"]) == "enphase/122200000001/prod_w/state",
       "le topic d'état est bien formé")
-check(panel.state_topic(p["w"]).startswith("enphase/122239086186/panneau/"),
+check(panel.state_topic(p["w"]).startswith("enphase/122200000001/panneau/"),
       "les panneaux ont leur propre branche de topics")
 
 # MQTT n'autorise qu'un testament par connexion : si le temoin de liaison et
 # la disponibilite vivaient sur deux topics, une mort brutale n'en corrigerait
 # qu'un et l'autre resterait bloque sur « en ligne ».
-check(bridge._availability_topic == "enphase/122239086186/link/state",
+check(bridge._availability_topic == "enphase/122200000001/link/state",
       "disponibilite et temoin de liaison partagent un seul topic")
 check(bridge._availability_topic not in
       [d.state_topic(x) for d in devices.values() for x in d.sensors],
       "ce topic n'est celui d'aucun capteur ordinaire")
 
 block = bridge._device_block(panel)
-check(block["via_device"] == "enphase_122239086186",
+check(block["via_device"] == "enphase_122200000001",
       "les panneaux sont rattachés à la passerelle")
 check(bridge._device_block(gw).get("via_device") is None,
       "la passerelle n'est rattachée à rien")

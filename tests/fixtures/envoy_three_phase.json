@@ -1,7 +1,7 @@
 {
-  "_comment": "Forme reelle d'un EnvoyData triphase a 10 micro-onduleurs. Valeurs relevees sur une installation, numeros de serie synthetiques.",
+  "_comment": "Forme reelle d'un EnvoyData triphase a 10 micro-onduleurs. Valeurs relevees sur une installation ; tous les numeros de serie sont synthetiques, passerelle comprise.",
   "envoy": {
-    "serial_number": "122239086186",
+    "serial_number": "122200000001",
     "firmware": "8.3.5169",
     "part_number": "800-00654-r08",
     "phase_count": 3
