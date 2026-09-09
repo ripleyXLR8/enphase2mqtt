@@ -56,6 +56,18 @@ publish_phases = true
 ;   panel_names = 482233004696:Panneau 1, 482233004841:Panneau 2
 panel_names =
 
+; ENVOY_PANEL_GROUPS
+; Optional. Groups panels into arrays - a roof face, a string - and publishes
+; one extra device per group, with power, energy today, lifetime energy and
+; installed peak power, summed over its members.
+; Format is the mirror of panel_names: the group name first, then its members
+; joined by "+".
+;   panel_groups = Roof East:482233004867+482233004853, Roof West:482232101756+482233004841
+; A serial that the gateway does not know is dropped from the sum and logged;
+; a group with no known panel at all is skipped. Without this setting, no group
+; is created.
+panel_groups =
+
 [mqtt]
 ; MQTT_HOST / MQTT_PORT
 host = 127.0.0.1

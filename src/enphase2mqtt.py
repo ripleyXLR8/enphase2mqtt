@@ -58,6 +58,7 @@ ENV_OVERRIDES: dict[str, tuple[str, str]] = {
     "ENVOY_TOKEN_FILE": ("envoy", "token_file"),
     "ENVOY_POLL_INTERVAL": ("envoy", "poll_interval"),
     "ENVOY_PANEL_NAMES": ("envoy", "panel_names"),
+    "ENVOY_PANEL_GROUPS": ("envoy", "panel_groups"),
     "ENVOY_PUBLISH_PANELS": ("envoy", "publish_panels"),
     "ENVOY_PUBLISH_PHASES": ("envoy", "publish_phases"),
     "MQTT_HOST": ("mqtt", "host"),
@@ -221,6 +222,46 @@ PANEL_SENSORS: tuple[Sensor, ...] = (
 )
 
 
+# --- Par champ : 4 entités par groupe de panneaux -------------------------
+
+
+def _grp(field_name: str) -> Callable[[Any], Any]:
+    """Somme une grandeur sur les panneaux d'un champ.
+
+    Un panneau qui n'a pas encore remonté la grandeur est ignoré plutôt que
+    compté pour zéro : mieux vaut une somme partielle qu'un creux inventé.
+    """
+
+    def get(inverters: Any) -> Any:
+        values = [
+            getattr(inv, field_name, None)
+            for inv in inverters
+            if getattr(inv, field_name, None) is not None
+        ]
+        return sum(values) if values else None
+
+    return get
+
+
+GROUP_SENSORS: tuple[Sensor, ...] = (
+    Sensor("w", "Puissance", _grp("last_report_watts"), "W", "power"),
+    Sensor("wh_today", "Production du jour", _grp("energy_today"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("wh_total", "Production totale", _grp("lifetime_energy"), "Wh", "energy", ENERGY_TOTAL),
+    # Puissance crête installée du champ : constante, donc diagnostic.
+    Sensor("w_max", "Puissance max", _grp("max_report_watts"), "W", "power", state_class="", diagnostic=True),
+)
+
+
+def slugify(value: str) -> str:
+    out = []
+    for char in value.lower():
+        out.append(char if char.isalnum() else "_")
+    slug = "".join(out).strip("_")
+    while "__" in slug:
+        slug = slug.replace("__", "_")
+    return slug or "groupe"
+
+
 # ----------------------------------------------------------------------
 # Modèle
 # ----------------------------------------------------------------------
@@ -258,6 +299,9 @@ class Bridge:
         self._panel_names = self._parse_panel_names(
             config.get("envoy", "panel_names", fallback="")
         )
+        self._panel_groups = self._parse_panel_groups(
+            config.get("envoy", "panel_groups", fallback="")
+        )
 
         self._envoy: Envoy | None = None
         self._mqtt: mqtt.Client | None = None
@@ -284,6 +328,24 @@ class Bridge:
             if serial and label:
                 names[serial] = label
         return names
+
+    @staticmethod
+    def _parse_panel_groups(raw: str) -> list[tuple[str, list[str]]]:
+        """« Champ 1:sn1+sn2, Champ 2:sn3 » -> [(nom, [sn...]), ...].
+
+        L'ordre de déclaration est conservé : c'est celui de l'affichage.
+        """
+        groups: list[tuple[str, list[str]]] = []
+        for chunk in raw.split(","):
+            chunk = chunk.strip()
+            if not chunk or ":" not in chunk:
+                continue
+            name, _, members = chunk.partition(":")
+            name = name.strip()
+            serials = [m.strip() for m in members.split("+") if m.strip()]
+            if name and serials:
+                groups.append((name, serials))
+        return groups
 
     @property
     def _availability_topic(self) -> str:
@@ -417,11 +479,58 @@ class Bridge:
                     via=gateway_id,
                 )
             LOGGER.info("%d micro-onduleur(s) détecté(s)", len(inverters))
+            self._build_groups(gateway_id, inverters)
 
         total = sum(len(dev.sensors) for dev in self._devices.values()) + 1
         LOGGER.info(
             "%d appareil(s), %d entité(s) publiée(s)", len(self._devices), total
         )
+
+    def _build_groups(self, gateway_id: str, inverters: dict[str, Any]) -> None:
+        """Un appareil par champ : les grandeurs des panneaux, sommées.
+
+        Un champ est un sous-ensemble de panneaux partageant une orientation ou
+        une chaîne. Rien ne l'impose : sans configuration, aucun champ.
+        """
+        known = {str(serial) for serial in inverters}
+        groupes = 0
+        for name, serials in self._panel_groups:
+            absents = [sn for sn in serials if sn not in known]
+            if absents:
+                # Une somme silencieusement amputée serait pire qu'une erreur.
+                LOGGER.warning(
+                    "Champ « %s » : %d numéro(s) de série inconnu(s) de la "
+                    "passerelle, ignoré(s) : %s",
+                    name,
+                    len(absents),
+                    ", ".join(absents),
+                )
+            membres = [sn for sn in serials if sn in known]
+            if not membres:
+                LOGGER.error("Champ « %s » : aucun panneau connu, champ ignoré", name)
+                continue
+            key = f"group_{slugify(name)}"
+            if key in self._devices:
+                LOGGER.error("Champ « %s » : nom en double, champ ignoré", name)
+                continue
+            self._devices[key] = Device(
+                device_id=f"{gateway_id}_{key}",
+                name=name,
+                model=f"Champ de {len(membres)} panneaux",
+                base_topic=f"{self._prefix}/{self._serial}/champ/{slugify(name)}",
+                sensors=GROUP_SENSORS,
+                source=(
+                    lambda m: lambda d: [
+                        inv
+                        for sn, inv in (getattr(d, "inverters", None) or {}).items()
+                        if str(sn) in m
+                    ]
+                )(set(membres)),
+                via=gateway_id,
+            )
+            groupes += 1
+        if groupes:
+            LOGGER.info("%d champ(s) de panneaux construit(s)", groupes)
 
     # ------------------------------------------------------------------
     # Découverte

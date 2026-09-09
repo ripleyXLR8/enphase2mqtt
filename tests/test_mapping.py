@@ -203,6 +203,61 @@ check(e2m.Bridge._parse_panel_names("  a:Un , b:Deux ,, mauvais ") ==
       {"a": "Un", "b": "Deux"},
       "le mapping tolère espaces et entrées mal formées")
 
+print("\n== champs de panneaux ==")
+check(not [k for k in devices if k.startswith("group_")],
+      "sans configuration, aucun champ n est cree")
+
+sn = sorted(data.inverters)
+bg, _ = build(panel_groups=f"Champ 1 - A:{sn[0]}+{sn[1]}, Champ 2 - B:{sn[7]}+{sn[8]}+{sn[9]}")
+groupes = {k: v for k, v in bg._devices.items() if k.startswith("group_")}
+check(len(groupes) == 2, "deux champs declares donnent deux appareils")
+check(sum(len(d.sensors) for d in bg._devices.values()) + 1 == 105 + 8,
+      "chaque champ ajoute 4 entites")
+
+g = bg._devices["group_champ_1_a"]
+gs = {x.key: x for x in g.sensors}
+membres = g.source(data)
+check(len(membres) == 2, "le champ ne retient que ses panneaux")
+check(gs["w"].render(gs["w"].getter(membres)) == "36",
+      "la puissance du champ est la somme de ses panneaux (18+18)")
+check(gs["wh_today"].render(gs["wh_today"].getter(membres)) == "85",
+      "la production du jour est sommee (42+43)")
+check(gs["w_max"].render(gs["w_max"].getter(membres)) == "558",
+      "la puissance max du champ est la somme des cretes (2 x 279)")
+check(g.name == "Champ 1 - A"
+      and g.state_topic(gs["w"]).endswith("champ/champ_1_a/w/state"),
+      "le nom du champ est respecte et son topic est en ardoise")
+check(bg._device_block(g)["via_device"] == "enphase_122200000001",
+      "les champs sont rattaches a la passerelle")
+
+g2 = bg._devices["group_champ_2_b"]
+check(len(g2.source(data)) == 3, "un champ de trois panneaux en retient trois")
+
+# Une somme silencieusement amputee serait pire qu une erreur visible.
+bmix, _ = build(panel_groups=f"Melange:{sn[0]}+000000000000")
+check(len(bmix._devices["group_melange"].source(data)) == 1,
+      "un numero de serie inconnu est ecarte de la somme")
+bko, _ = build(panel_groups="Fantome:000000000000+111111111111")
+check(not [k for k in bko._devices if k.startswith("group_")],
+      "un champ dont aucun panneau n existe est ignore")
+bdup, _ = build(panel_groups=f"Champ:{sn[0]}, Champ:{sn[1]}")
+dups = [k for k in bdup._devices if k.startswith("group_")]
+# Sans garde, le second champ ecraserait le premier dans le dictionnaire :
+# toujours un seul appareil, mais avec les mauvais panneaux.
+check(len(dups) == 1 and
+      [i.serial_number for i in bdup._devices[dups[0]].source(data)] == [sn[0]],
+      "un nom de champ en double garde la premiere declaration, sans ecrasement")
+
+check(e2m.Bridge._parse_panel_groups(" A:1+2 , B:3 ,, casse ")
+      == [("A", ["1", "2"]), ("B", ["3"])],
+      "l analyseur tolere espaces et entrees mal formees")
+check(e2m._grp("x")([Obj({"x": 5}), Obj({}), Obj({"x": 7})]) == 12,
+      "un panneau sans valeur est ignore, pas compte pour zero")
+check(e2m._grp("x")([Obj({}), Obj({})]) is None,
+      "un champ dont aucun panneau n a de valeur ne publie rien")
+check(e2m.slugify("Champ 1 - A") == "champ_1_a",
+      "le nom de champ devient une ardoise propre")
+
 print("\n== options ==")
 b3, _ = build(publish_panels="false")
 check(not [k for k in b3._devices if k.startswith("panel_")],

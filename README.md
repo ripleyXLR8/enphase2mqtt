@@ -28,6 +28,9 @@ long before the total production says anything at all.
 - **One device per microinverter.** Power, energy today, lifetime energy, DC
   voltage, DC current, temperature.
 - **One device per phase** on a three phase installation.
+- **One device per array**, optional: group panels by roof face or string and
+  get their power, energy and installed peak summed. A serial the gateway does
+  not know is dropped from the sum and logged, never counted as zero.
 - **The meters**, with the things the aggregate view usually drops: power
   factor, current, grid voltage and frequency, and the metering status of each
   CT — the "a current transformer has dropped out" signal.
@@ -48,6 +51,7 @@ long before the total production says anything at all.
 | Envoy | 24 | production, consumption and net consumption (now, today, 7 days, lifetime), power factor and current of both CTs, grid voltage and frequency, metering status and fault flags, link indicator |
 | Envoy phase L1/L2/L3 | 7 each | production and consumption (now and today), net consumption, voltage, power factor |
 | One per panel | 6 each | power, energy today, lifetime energy, DC voltage, DC current, temperature |
+| One per array (optional) | 4 each | power, energy today, lifetime energy, installed peak power - summed over the panels of the group |
 
 Aggregates the gateway does not compute are deliberately absent: the Envoy
 reports `0` for net consumption "today" and "last 7 days", so publishing them
@@ -101,6 +105,9 @@ Useful ones:
   choice. Without it panels are named `Panneau 1`, `Panneau 2`… in ascending
   serial order, which will **not** necessarily match the numbering of an
   integration you are replacing.
+- `ENVOY_PANEL_GROUPS` declares arrays: `Roof East:serial+serial, Roof West:serial`.
+  Note the mirrored order - `panel_names` is keyed by serial, `panel_groups` by
+  group name, because a group has no identifier of its own.
 - `ENVOY_PUBLISH_PANELS` / `ENVOY_PUBLISH_PHASES` turn whole blocks off.
 
 ## Topics
@@ -110,6 +117,7 @@ Useful ones:
 <prefix>/<serial>/<entity>/state               gateway entities
 <prefix>/<serial>/phase_l1/<entity>/state      per phase
 <prefix>/<serial>/panneau/<inverter>/<e>/state per panel
+<prefix>/<serial>/champ/<group>/<entity>/state  per array
 <discovery_prefix>/sensor/<device>/<e>/config  discovery
 ```
 
