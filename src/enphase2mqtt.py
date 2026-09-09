@@ -143,6 +143,26 @@ def _ct(attr: str, field_name: str) -> Callable[[Any], Any]:
 
 ENERGY_TOTAL = "total_increasing"
 
+
+def _split(getter: Callable[..., Any], keep_positive: bool) -> Callable[..., Any]:
+    """Separe un flux signe en soutirage et injection.
+
+    La passerelle ne publie qu'une puissance nette signee : positive quand on
+    tire sur le reseau, negative quand on y renvoie. Le partage est une
+    fonction pure de cette valeur, sans etat a conserver.
+    """
+
+    def get(*args: Any) -> Any:
+        value = getter(*args)
+        if value is None:
+            return None
+        value = float(value)
+        if keep_positive:
+            return value if value > 0 else 0.0
+        return -value if value < 0 else 0.0
+
+    return get
+
 # --- Passerelle : 24 entités -----------------------------------------------
 
 GATEWAY_SENSORS: tuple[Sensor, ...] = (
@@ -162,6 +182,8 @@ GATEWAY_SENSORS: tuple[Sensor, ...] = (
     Sensor("net_w", "Consommation nette", _sys("system_net_consumption", "watts_now"), "W", "power"),
     Sensor("net_wh_total", "Consommation nette totale", _sys("system_net_consumption", "watt_hours_lifetime"), "Wh", "energy", ENERGY_TOTAL),
     # Compteur de production
+    Sensor("import_w", "Soutirage", _split(_sys("system_net_consumption", "watts_now"), True), "W", "power"),
+    Sensor("export_w", "Injection", _split(_sys("system_net_consumption", "watts_now"), False), "W", "power"),
     Sensor("ct_prod_pf", "Facteur de puissance production", _ct("ctmeter_production", "power_factor"), "", "power_factor", render=as_dec(3)),
     Sensor("ct_prod_a", "Courant production", _ct("ctmeter_production", "current"), "A", "current", render=as_dec(3)),
     # Tension et fréquence ne sont publiées qu'une fois : les deux compteurs
@@ -200,6 +222,18 @@ PHASE_SENSORS: tuple[Sensor, ...] = (
     Sensor("net_w", "Consommation nette {ph}", _phase("system_net_consumption_phases", "watts_now"), "W", "power"),
     Sensor("grid_v", "Tension {ph}", _phase("ctmeter_production_phases", "voltage"), "V", "voltage", render=as_dec(1)),
     Sensor("pf", "Facteur de puissance {ph}", _phase("ctmeter_production_phases", "power_factor"), "", "power_factor", render=as_dec(3)),
+    # Cumuls par phase : le plugin remplace les historise depuis 2023.
+    Sensor("prod_wh_7d", "Production 7 jours {ph}", _phase("system_production_phases", "watt_hours_last_7_days"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("prod_wh_total", "Production totale {ph}", _phase("system_production_phases", "watt_hours_lifetime"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("conso_wh_7d", "Consommation 7 jours {ph}", _phase("system_consumption_phases", "watt_hours_last_7_days"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("conso_wh_total", "Consommation totale {ph}", _phase("system_consumption_phases", "watt_hours_lifetime"), "Wh", "energy", ENERGY_TOTAL),
+    # Sur la consommation nette, seul le cumul est reel : la passerelle laisse
+    # le jour et les 7 jours a zero, comme au niveau global.
+    Sensor("net_wh_total", "Consommation nette totale {ph}", _phase("system_net_consumption_phases", "watt_hours_lifetime"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("grid_wh_delivered", "Energie soutiree {ph}", _phase("ctmeter_consumption_phases", "energy_delivered"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("grid_wh_received", "Energie injectee {ph}", _phase("ctmeter_consumption_phases", "energy_received"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("import_w", "Soutirage {ph}", _split(_phase("system_net_consumption_phases", "watts_now"), True), "W", "power"),
+    Sensor("export_w", "Injection {ph}", _split(_phase("system_net_consumption_phases", "watts_now"), False), "W", "power"),
 )
 
 # --- Par panneau : 6 entités × 10 = 60 -------------------------------------
@@ -219,6 +253,7 @@ PANEL_SENSORS: tuple[Sensor, ...] = (
     Sensor("dc_v", "Tension DC", _inv("dc_voltage"), "V", "voltage", render=as_dec(1)),
     Sensor("dc_a", "Courant DC", _inv("dc_current"), "A", "current", render=as_dec(3)),
     Sensor("temp", "Température", _inv("temperature"), "°C", "temperature", render=as_dec(0)),
+    Sensor("w_max", "Puissance max", _inv("max_report_watts"), "W", "power", state_class="", diagnostic=True),
 )
 
 

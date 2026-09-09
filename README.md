@@ -34,8 +34,8 @@ long before the total production says anything at all.
 - **The meters**, with the things the aggregate view usually drops: power
   factor, current, grid voltage and frequency, and the metering status of each
   CT — the "a current transformer has dropped out" signal.
-- **Curated, not dumped.** Around 105 entities on a three phase installation
-  with ten panels, and every one of them carries a value. Aggregates the gateway
+- **Curated, not dumped.** Around 160 entities on a three phase installation
+  with ten panels and four arrays, and every one of them carries a value. Aggregates the gateway
   leaves permanently at zero are not published, and grid voltage and frequency
   are published once rather than once per meter.
 - **Local and read-only.** No cloud polling, no commands, nothing written to the
@@ -48,14 +48,22 @@ long before the total production says anything at all.
 
 | Device | Entities | Contents |
 | --- | --- | --- |
-| Envoy | 24 | production, consumption and net consumption (now, today, 7 days, lifetime), power factor and current of both CTs, grid voltage and frequency, metering status and fault flags, link indicator |
-| Envoy phase L1/L2/L3 | 7 each | production and consumption (now and today), net consumption, voltage, power factor |
-| One per panel | 6 each | power, energy today, lifetime energy, DC voltage, DC current, temperature |
+| Envoy | 26 | production, consumption and net consumption (now, today, 7 days, lifetime), grid import and export drawn apart, power factor and current of both CTs, grid voltage and frequency, metering status and fault flags, link indicator |
+| Envoy phase L1/L2/L3 | 16 each | the same, per phase: production and consumption (now, today, 7 days, lifetime), net consumption, import and export, meter energies, voltage, power factor |
+| One per panel | 7 each | power, energy today, lifetime energy, DC voltage, DC current, temperature, installed peak |
 | One per array (optional) | 4 each | power, energy today, lifetime energy, installed peak power - summed over the panels of the group |
 
 Aggregates the gateway does not compute are deliberately absent: the Envoy
 reports `0` for net consumption "today" and "last 7 days", so publishing them
 would create entities that never hold anything.
+
+**Grid import and export** are published separately as well as netted. The
+gateway reports one signed net power - positive when drawing from the grid,
+negative when feeding it - and the split is a pure function of that value, with
+no state kept across days. **Daily or weekly deltas are not published**: those
+need bookkeeping across midnight, which belongs in whatever consumes this feed
+(Home Assistant's Energy dashboard, Jeedom's Suivi Conso) rather than in a
+bridge that would have to persist and reset counters of its own.
 
 ## Requirements
 

@@ -21,7 +21,7 @@
     Everything is read straight from the gateway on your LAN. The Enphase cloud is contacted once, to obtain the local access token, which is then stored and renewed automatically. Built on pyenphase, the library behind the official Home Assistant Enphase integration, so firmware differences are probed rather than assumed.
 
     CURATED, NOT DUMPED:
-    Around 105 entities on a three phase installation with ten panels, and every one of them carries a value. Aggregates the gateway leaves permanently at zero are not published, and grid voltage and frequency are published once rather than once per meter.
+    Around 160 entities on a three phase installation with ten panels and four arrays, and every one of them carries a value. Grid import and export are published apart as well as netted. Aggregates the gateway leaves permanently at zero are not published, and grid voltage and frequency are published once rather than once per meter.
 
     ROBUST:
     Discovery and states are replayed on every reconnection to the broker, so a broker restart cannot leave the bridge silently out of sync. An MQTT Last Will reports the bridge going down. A gateway reboot or a network glitch flips the bridge to offline and it retries, rather than dying.

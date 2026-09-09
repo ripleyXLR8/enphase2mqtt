@@ -58,7 +58,7 @@ def build(**options):
     for key, value in raw["data"].items():
         if key in ("inverters", "system_production_phases",
                    "system_consumption_phases", "system_net_consumption_phases",
-                   "ctmeter_production_phases"):
+                   "ctmeter_production_phases", "ctmeter_consumption_phases"):
             setattr(data, key, {k: inflate(v) for k, v in value.items()})
         else:
             setattr(data, key, inflate(value))
@@ -89,12 +89,12 @@ check(len([k for k in devices if k.startswith("panel_")]) == 10,
       "les 10 micro-onduleurs donnent 10 appareils")
 
 total = sum(len(d.sensors) for d in devices.values()) + 1
-check(total == 105,
-      f"la curation tient ses 105 entités (obtenu : {total})")
-check(len(devices["gateway"].sensors) == 23,
-      "23 capteurs sur la passerelle, plus le témoin de liaison = 24 entités")
-check(len(e2m.PHASE_SENSORS) == 7, "7 entités par phase")
-check(len(e2m.PANEL_SENSORS) == 6, "6 entités par panneau")
+check(total == 144,
+      f"la curation tient ses 144 entités (obtenu : {total})")
+check(len(devices["gateway"].sensors) == 25,
+      "25 capteurs sur la passerelle, plus le témoin de liaison = 26 entités")
+check(len(e2m.PHASE_SENSORS) == 16, "16 entités par phase")
+check(len(e2m.PANEL_SENSORS) == 7, "7 entités par panneau")
 
 print("\n== unicité ==")
 unique_ids, names_per_device, topics = [], {}, []
@@ -165,6 +165,41 @@ check(p["temp"].render(p["temp"].getter(panel.source(data))) == "22",
 check(p["dc_v"].render(p["dc_v"].getter(panel.source(data))) == "38.0",
       "la tension DC du premier panneau est lue correctement")
 
+print("\n== soutirage et injection ==")
+gw_keys = {x.key: x for x in gw.sensors}
+imp, exp = gw_keys["import_w"], gw_keys["export_w"]
+# La fixture porte une consommation nette de +886 W : on tire sur le reseau.
+check(imp.render(imp.getter(data)) == "886", "une puissance nette positive est du soutirage")
+check(exp.render(exp.getter(data)) == "0", "et l injection est alors nulle")
+
+pos = e2m._split(lambda d: 250.0, True)
+neg = e2m._split(lambda d: 250.0, False)
+check((pos(None), neg(None)) == (250.0, 0.0), "un flux entrant ne compte qu en soutirage")
+pos2 = e2m._split(lambda d: -400.0, True)
+neg2 = e2m._split(lambda d: -400.0, False)
+check((pos2(None), neg2(None)) == (0.0, 400.0),
+      "un flux sortant ne compte qu en injection, et en valeur absolue")
+check(e2m._split(lambda d: 0, True)(None) == 0.0
+      and e2m._split(lambda d: 0, False)(None) == 0.0,
+      "un flux nul ne compte nulle part")
+check(e2m._split(lambda d: None, True)(None) is None,
+      "une valeur absente ne publie rien plutot que zero")
+
+ph = devices["phase_l1"]
+pk = {x.key: x for x in ph.sensors}
+# La phase L1 de la fixture est a -761 W : elle injecte.
+check(pk["export_w"].render(pk["export_w"].getter(data, "L1")) == "761"
+      and pk["import_w"].render(pk["import_w"].getter(data, "L1")) == "0",
+      "le partage fonctionne aussi par phase")
+check(pk["prod_wh_total"].render(pk["prod_wh_total"].getter(data, "L1")) == "2887283",
+      "le cumul de production par phase est lu correctement")
+check(pk["grid_wh_delivered"].render(pk["grid_wh_delivered"].getter(data, "L1")) == "2595310",
+      "l energie soutiree par phase vient du compteur reseau")
+
+pmax = {x.key: x for x in panel.sensors}["w_max"]
+check(pmax.render(pmax.getter(panel.source(data))) == "279",
+      "la puissance crete du panneau est publiee")
+
 print("\n== découverte ==")
 check(bridge._discovery_topic(gw, "prod_w", "sensor")
       == "homeassistant/sensor/enphase_122200000001/prod_w/config",
@@ -211,7 +246,7 @@ sn = sorted(data.inverters)
 bg, _ = build(panel_groups=f"Champ 1 - A:{sn[0]}+{sn[1]}, Champ 2 - B:{sn[7]}+{sn[8]}+{sn[9]}")
 groupes = {k: v for k, v in bg._devices.items() if k.startswith("group_")}
 check(len(groupes) == 2, "deux champs declares donnent deux appareils")
-check(sum(len(d.sensors) for d in bg._devices.values()) + 1 == 105 + 8,
+check(sum(len(d.sensors) for d in bg._devices.values()) + 1 == 144 + 8,
       "chaque champ ajoute 4 entites")
 
 g = bg._devices["group_champ_1_a"]
