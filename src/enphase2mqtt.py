@@ -230,8 +230,8 @@ PHASE_SENSORS: tuple[Sensor, ...] = (
     # Sur la consommation nette, seul le cumul est reel : la passerelle laisse
     # le jour et les 7 jours a zero, comme au niveau global.
     Sensor("net_wh_total", "Consommation nette totale {ph}", _phase("system_net_consumption_phases", "watt_hours_lifetime"), "Wh", "energy", ENERGY_TOTAL),
-    Sensor("grid_wh_delivered", "Energie soutiree {ph}", _phase("ctmeter_consumption_phases", "energy_delivered"), "Wh", "energy", ENERGY_TOTAL),
-    Sensor("grid_wh_received", "Energie injectee {ph}", _phase("ctmeter_consumption_phases", "energy_received"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("grid_wh_delivered", "Énergie soutirée {ph}", _phase("ctmeter_consumption_phases", "energy_delivered"), "Wh", "energy", ENERGY_TOTAL),
+    Sensor("grid_wh_received", "Énergie injectée {ph}", _phase("ctmeter_consumption_phases", "energy_received"), "Wh", "energy", ENERGY_TOTAL),
     Sensor("import_w", "Soutirage {ph}", _split(_phase("system_net_consumption_phases", "watts_now"), True), "W", "power"),
     Sensor("export_w", "Injection {ph}", _split(_phase("system_net_consumption_phases", "watts_now"), False), "W", "power"),
 )

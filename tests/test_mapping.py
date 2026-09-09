@@ -120,6 +120,12 @@ apostrophes = [n for n in all_names if "'" in n]
 # quelle commande : un nom qui en contient arrive tronqué et illisible.
 check(not apostrophes, f"aucune apostrophe ASCII dans un nom ({apostrophes})")
 
+# Les libelles francais s ecrivent avec leurs accents. La derive est facile
+# quand on ajoute une ligne de table sans relire ses voisines.
+SANS_ACCENT = ("Energie", "Etat", "Temperature", "Frequence", "Reseau", "Cle")
+fautes = [n for n in all_names for m in SANS_ACCENT if m in n]
+check(not fautes, f"aucun libelle francais desaccentue ({fautes})")
+
 vides = [
     s.key for s in e2m.GATEWAY_SENSORS
     if s.getter(data) is None
